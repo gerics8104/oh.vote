@@ -1,0 +1,63 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "idopont": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "targy": {
+      "type": "string"
+    },
+    "tipus": {
+      "type": "string",
+      "enum": [
+        "j",
+        "e",
+        "m"
+      ]
+    },
+    "eljaras": {
+      "type": "string",
+      "enum": [
+        "n",
+        "s",
+        "k",
+        "e"
+      ]
+    },
+    "elnok": {
+      "type": "string"
+    },
+    "szavazatok": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "kepviselo": {
+            "type": "string"
+          },
+          "szavazat": {
+            "type": "string",
+            "enum": [
+              "i",
+              "n",
+              "t"
+            ]
+          }
+        },
+        "required": [
+          "kepviselo",
+          "szavazat"
+        ]
+      }
+    }
+  },
+  "required": [
+    "idopont",
+    "targy",
+    "tipus",
+    "elnok",
+    "szavazatok"
+  ]
+}
