@@ -2,6 +2,8 @@ package hu.oh.vote.service.szavazas.impl;
 
 import hu.oh.vote.Szavazas;
 import hu.oh.vote.SzavazasValasz;
+import hu.oh.vote.SzavazatValasz;
+import hu.oh.vote.exception.szavazas.SzavazasNotFoundException;
 import hu.oh.vote.exception.szavazas.SzavazasValidationException;
 import hu.oh.vote.model.szavazas.SzavazasEntity;
 import hu.oh.vote.model.szavazas.SzavazatEntity;
@@ -51,6 +53,22 @@ public class SzavazasServiceImpl implements SzavazasService {
         szavazasRepository.save(entity);
         SzavazasValasz valasz = new SzavazasValasz();
         valasz.setSzavazasId(entity.getAzonosito());
+        return valasz;
+    }
+
+    @Override
+    public SzavazatValasz getSzavazat(String szavazas, String kepviselo) {
+        SzavazatEntity entity = szavazasRepository
+                .getSzavazat(szavazas, kepviselo)
+                .orElseThrow(() ->
+                        new SzavazasNotFoundException(
+                                "A szavazás vagy a képviselő szavazata nem található."
+                        )
+                );
+
+        SzavazatValasz valasz = new SzavazatValasz();
+        valasz.setSzavazat(entity.getSzavazat());
+
         return valasz;
     }
 

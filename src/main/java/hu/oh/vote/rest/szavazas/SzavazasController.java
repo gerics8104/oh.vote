@@ -3,6 +3,7 @@ package hu.oh.vote.rest.szavazas;
 
 import hu.oh.vote.Szavazas;
 import hu.oh.vote.SzavazasValasz;
+import hu.oh.vote.SzavazatValasz;
 import hu.oh.vote.service.szavazas.SzavazasService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,4 +26,16 @@ public class SzavazasController {
             @Valid @RequestBody Szavazas szavazas) {
         return ResponseEntity.ok(szavazasService.szavazas(szavazas));
     }
+
+    @GetMapping("/szavazat")
+    public ResponseEntity<SzavazatValasz> szavazat(
+            @RequestParam("szavazasId") String szavazasId,
+            @RequestParam("kepviselo") String kepviselo) {
+
+        return ResponseEntity.ok(
+                szavazasService.getSzavazat(szavazasId, kepviselo)
+        );
+    }
+
+
 }
