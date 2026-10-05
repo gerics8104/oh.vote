@@ -1,9 +1,6 @@
 package hu.oh.vote.service.szavazas.impl;
 
-import hu.oh.vote.Szavazas;
-import hu.oh.vote.SzavazasEredmenyValasz;
-import hu.oh.vote.SzavazasValasz;
-import hu.oh.vote.SzavazatValasz;
+import hu.oh.vote.*;
 import hu.oh.vote.exception.szavazas.SzavazasNotFoundException;
 import hu.oh.vote.exception.szavazas.SzavazasValidationException;
 import hu.oh.vote.model.szavazas.SzavazasEntity;
@@ -15,10 +12,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.List;
+
 @Service
 public class SzavazasServiceImpl implements SzavazasService {
 
     private static final int OSSZES_KEPVISELO = 200;
+
+    private static final ZoneId ZONE_ID =
+            ZoneId.of("Europe/Budapest");
 
 
     private final SzavazasRepository szavazasRepository;
@@ -90,6 +96,83 @@ public class SzavazasServiceImpl implements SzavazasService {
                         )
                 );
 
+        return getEredmeny(szavazas);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public NapiSzavazasokValasz getNapiSzavazasok(LocalDate datum) {
+        Instant tol = datum
+                .atStartOfDay(ZONE_ID)
+                .toInstant();
+
+        Instant ig = datum
+                .plusDays(1)
+                .atStartOfDay(ZONE_ID)
+                .toInstant();
+
+        List<SzavazasEntity> szavazasok =
+                szavazasRepository.findNapiSzavazasok(tol, ig);
+
+        NapiSzavazasokValasz valasz = new NapiSzavazasokValasz();
+
+        valasz.setSzavazasok(
+                szavazasok.stream()
+                        .map(this::toNapiSzavazas)
+                        .toList()
+        );
+
+        return valasz;
+    }
+
+
+    private Szavazasok toNapiSzavazas(SzavazasEntity entity) {
+
+        SzavazasEredmenyValasz eredmeny = getEredmeny(entity);
+
+        Szavazasok dto = new Szavazasok();
+
+        dto.setIdopont(Date.from(entity.getIdopont()));
+        dto.setTargy(entity.getTargy());
+        dto.setTipus(Szavazasok.Tipus.fromValue(entity.getTipus()));
+
+        if (entity.getEljaras() != null) {
+            dto.setEljaras(
+                    Szavazasok.Eljaras.fromValue(entity.getEljaras())
+            );
+        }
+
+        dto.setElnok(entity.getElnok());
+
+        dto.setEredmeny(
+                Szavazasok.Eredmeny.fromValue(
+                        eredmeny.getEredmeny().value()
+                )
+        );
+
+        dto.setKepviselokSzama(
+                eredmeny.getKepviselokSzama()
+        );
+
+        dto.setSzavazatok(
+                entity.getSzavazatok().stream()
+                        .map(this::toNapiSzavazat)
+                        .toList()
+        );
+
+        return dto;
+    }
+
+    private Szavazatok toNapiSzavazat(SzavazatEntity entity) {
+        Szavazatok dto = new Szavazatok();
+        dto.setKepviselo(entity.getKepviselo());
+        dto.setSzavazat(entity.getSzavazat());
+        return dto;
+    }
+
+    private SzavazasEredmenyValasz getEredmeny(
+            SzavazasEntity szavazas) {
+
         long igenek = szavazas.getSzavazatok().stream()
                 .filter(sz -> "i".equals(sz.getSzavazat()))
                 .count();
@@ -147,7 +230,6 @@ public class SzavazasServiceImpl implements SzavazasService {
 
         return valasz;
     }
-
 
     private void ellenorizElnokSzavazott(Szavazas dto) {
 

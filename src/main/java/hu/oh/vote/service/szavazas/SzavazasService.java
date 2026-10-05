@@ -1,9 +1,9 @@
 package hu.oh.vote.service.szavazas;
 
-import hu.oh.vote.Szavazas;
-import hu.oh.vote.SzavazasEredmenyValasz;
-import hu.oh.vote.SzavazasValasz;
-import hu.oh.vote.SzavazatValasz;
+import hu.oh.vote.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 public interface SzavazasService {
 
@@ -12,4 +12,6 @@ public interface SzavazasService {
      SzavazatValasz getSzavazat(String szavazas, String kepviselo);
 
      SzavazasEredmenyValasz getEredmeny(String szavazasAzonosito);
+
+     NapiSzavazasokValasz getNapiSzavazasok(LocalDate datum);
 }

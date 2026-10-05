@@ -1,15 +1,15 @@
 package hu.oh.vote.rest.szavazas;
 
 
-import hu.oh.vote.Szavazas;
-import hu.oh.vote.SzavazasEredmenyValasz;
-import hu.oh.vote.SzavazasValasz;
-import hu.oh.vote.SzavazatValasz;
+import hu.oh.vote.*;
 import hu.oh.vote.service.szavazas.SzavazasService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @RestController
 @RequestMapping("/szavazasok")
@@ -44,6 +44,15 @@ public class SzavazasController {
 
         return ResponseEntity.ok(
                 szavazasService.getEredmeny(szavazasId)
+        );
+    }
+
+    @GetMapping("/napi-szavazasok")
+    public ResponseEntity<NapiSzavazasokValasz> getNapiSzavazasok(
+            @RequestParam("datum") LocalDate datum) {
+
+        return ResponseEntity.ok(
+                szavazasService.getNapiSzavazasok(datum)
         );
     }
 
