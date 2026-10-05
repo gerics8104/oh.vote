@@ -2,6 +2,7 @@ package hu.oh.vote.rest.szavazas;
 
 
 import hu.oh.vote.Szavazas;
+import hu.oh.vote.SzavazasEredmenyValasz;
 import hu.oh.vote.SzavazasValasz;
 import hu.oh.vote.SzavazatValasz;
 import hu.oh.vote.service.szavazas.SzavazasService;
@@ -34,6 +35,15 @@ public class SzavazasController {
 
         return ResponseEntity.ok(
                 szavazasService.getSzavazat(szavazasId, kepviselo)
+        );
+    }
+
+    @GetMapping("/eredmeny")
+    public ResponseEntity<SzavazasEredmenyValasz> getEredmeny(
+            @RequestParam("szavazasId") String szavazasId) {
+
+        return ResponseEntity.ok(
+                szavazasService.getEredmeny(szavazasId)
         );
     }
 

@@ -1,6 +1,7 @@
 package hu.oh.vote.service.szavazas.impl;
 
 import hu.oh.vote.Szavazas;
+import hu.oh.vote.SzavazasEredmenyValasz;
 import hu.oh.vote.SzavazasValasz;
 import hu.oh.vote.SzavazatValasz;
 import hu.oh.vote.exception.szavazas.SzavazasNotFoundException;
@@ -16,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SzavazasServiceImpl implements SzavazasService {
+
+    private static final int OSSZES_KEPVISELO = 200;
+
 
     private final SzavazasRepository szavazasRepository;
 
@@ -57,6 +61,7 @@ public class SzavazasServiceImpl implements SzavazasService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public SzavazatValasz getSzavazat(String szavazas, String kepviselo) {
         SzavazatEntity entity = szavazasRepository
                 .getSzavazat(szavazas, kepviselo)
@@ -71,6 +76,78 @@ public class SzavazasServiceImpl implements SzavazasService {
 
         return valasz;
     }
+
+
+    @Override
+    @Transactional(readOnly = true)
+    public SzavazasEredmenyValasz getEredmeny(String szavazasAzonosito) {
+
+        SzavazasEntity szavazas = szavazasRepository
+                .findByAzonosito(szavazasAzonosito)
+                .orElseThrow(() ->
+                        new SzavazasNotFoundException(
+                                "A megadott azonosítóval nem található szavazás."
+                        )
+                );
+
+        long igenek = szavazas.getSzavazatok().stream()
+                .filter(sz -> "i".equals(sz.getSzavazat()))
+                .count();
+
+        long nemek = szavazas.getSzavazatok().stream()
+                .filter(sz -> "n".equals(sz.getSzavazat()))
+                .count();
+
+        long tartozkodasok = szavazas.getSzavazatok().stream()
+                .filter(sz -> "t".equals(sz.getSzavazat()))
+                .count();
+
+        long kepviselokSzama;
+        boolean elfogadott;
+
+        switch (szavazas.getTipus()) {
+            case "j" -> {
+                kepviselokSzama = szavazas.getSzavazatok().size();
+                elfogadott = true;
+            }
+
+            case "e" -> {
+                kepviselokSzama = szavazasRepository
+                        .countJelenlevok(szavazas.getIdopont());
+                if (kepviselokSzama == 0) {
+                    throw new SzavazasValidationException(
+                            "Nem található korábbi jelenléti szavazás."
+                    );
+                }
+                elfogadott = igenek > kepviselokSzama / 2;
+            }
+
+            case "m" -> {
+                kepviselokSzama = OSSZES_KEPVISELO;
+                elfogadott = igenek > OSSZES_KEPVISELO / 2;
+            }
+
+            default -> throw new IllegalStateException(
+                    "Ismeretlen szavazástípus: " + szavazas.getTipus()
+            );
+        }
+
+        SzavazasEredmenyValasz valasz = new SzavazasEredmenyValasz();
+
+        valasz.setEredmeny(
+                elfogadott
+                        ? SzavazasEredmenyValasz.Eredmeny.F
+                        : SzavazasEredmenyValasz.Eredmeny.U
+        );
+
+        valasz.setKepviselokSzama((int) kepviselokSzama);
+        valasz.setIgenekSzama((int) igenek);
+        valasz.setNemekSzama((int) nemek);
+        valasz.setTartozkodasokSzama((int) tartozkodasok);
+
+        return valasz;
+    }
+
 
     private void ellenorizElnokSzavazott(Szavazas dto) {
 
