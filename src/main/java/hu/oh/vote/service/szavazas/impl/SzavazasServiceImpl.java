@@ -126,6 +126,36 @@ public class SzavazasServiceImpl implements SzavazasService {
     }
 
 
+    @Override
+    @Transactional(readOnly = true)
+    public KepviseloReszvetelAtlag getKepviseloReszvetelAtlag(
+            LocalDate tol,
+            LocalDate ig) {
+
+        Instant tolInstant = tol
+                .atStartOfDay(ZONE_ID)
+                .toInstant();
+
+        Instant igInstant = ig
+                .plusDays(1)
+                .atStartOfDay(ZONE_ID)
+                .toInstant();
+
+        long reszvetelek = szavazasRepository
+                .countReszvetelek(tolInstant, igInstant);
+
+        double atlag = reszvetelek / (double) OSSZES_KEPVISELO;
+
+        KepviseloReszvetelAtlag valasz =
+                new KepviseloReszvetelAtlag();
+
+        valasz.setAtlag(
+                Math.round(atlag * 100.0) / 100.0
+        );
+
+        return valasz;
+    }
+
     private Szavazasok toNapiSzavazas(SzavazasEntity entity) {
 
         SzavazasEredmenyValasz eredmeny = getEredmeny(entity);

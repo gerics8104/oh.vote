@@ -60,4 +60,16 @@ public interface SzavazasRepository extends JpaRepository<SzavazasEntity, Long> 
             @Param("ig") Instant ig
     );
 
+
+    @Query("""
+            SELECT COUNT(sz)
+            FROM SzavazatEntity sz
+            JOIN sz.szavazasEntity s
+            WHERE s.idopont >= :tol
+              AND s.idopont < :ig
+              AND s.tipus <> 'j'
+            """)
+    long countReszvetelek(
+            @Param("tol") Instant tol,
+            @Param("ig") Instant ig);
 }

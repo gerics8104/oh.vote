@@ -56,5 +56,14 @@ public class SzavazasController {
         );
     }
 
+    @GetMapping("/kepviselo-reszvetel-atlag")
+    public ResponseEntity<KepviseloReszvetelAtlag> getKepviseloReszvetelAtlag(
+            @RequestParam("idoszak-kezdete") LocalDate tol,
+            @RequestParam("idoszak-vege") LocalDate ig) {
+
+        return ResponseEntity.ok(
+                szavazasService.getKepviseloReszvetelAtlag(tol, ig)
+        );
+    }
 
 }
