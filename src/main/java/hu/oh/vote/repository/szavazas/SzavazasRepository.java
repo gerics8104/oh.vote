@@ -1,4 +1,4 @@
-package hu.oh.vote.repsoitory.szavazas;
+package hu.oh.vote.repository.szavazas;
 
 
 import hu.oh.vote.model.szavazas.SzavazasEntity;
@@ -14,15 +14,14 @@ import java.util.Optional;
 public interface SzavazasRepository extends JpaRepository<SzavazasEntity, Long> {
 
     @Query("""
-            
-                SELECT sz
+            SELECT sz
             FROM SzavazatEntity sz
             JOIN sz.szavazasEntity s
-            WHERE s.azonosito = :szavazas
+            WHERE s.azonosito = :szavazasId
               AND sz.kepviselo = :kepviselo
             """)
     Optional<SzavazatEntity> getSzavazat(
-            @Param("szavazas") String szavazas,
+            @Param("szavazasId") String szavazasId,
             @Param("kepviselo") String kepviselo
     );
 
@@ -46,20 +45,18 @@ public interface SzavazasRepository extends JpaRepository<SzavazasEntity, Long> 
     Optional<SzavazasEntity> findByAzonosito(
             @Param("azonosito") String azonosito);
 
-
     @Query("""
-            SELECT s
-            FROM SzavazasEntity s
-            LEFT JOIN FETCH s.szavazatok
-            WHERE s.idopont >= :tol
+    SELECT s
+    FROM SzavazasEntity s
+    LEFT JOIN FETCH s.szavazatok
+    WHERE s.idopont >= :tol
               AND s.idopont < :ig
-            ORDER BY s.idopont
-            """)
+    ORDER BY s.idopont
+    """)
     List<SzavazasEntity> findNapiSzavazasok(
             @Param("tol") Instant tol,
             @Param("ig") Instant ig
     );
-
 
     @Query("""
             SELECT COUNT(sz)
@@ -69,7 +66,23 @@ public interface SzavazasRepository extends JpaRepository<SzavazasEntity, Long> 
               AND s.idopont < :ig
               AND s.tipus <> 'j'
             """)
+
     long countReszvetelek(
             @Param("tol") Instant tol,
             @Param("ig") Instant ig);
+
+
+    @Query("""
+            SELECT s
+            FROM SzavazasEntity s
+            LEFT JOIN FETCH s.szavazatok
+            WHERE s.idopont >= :tol
+              AND s.idopont < :ig
+              AND s.eljaras IN ('s', 'k', 'e')
+            ORDER BY s.idopont
+            """)
+    List<SzavazasEntity> findKulonlegesEljarasuSzavazasok(
+            @Param("tol") Instant tol,
+            @Param("ig") Instant ig
+    );
 }

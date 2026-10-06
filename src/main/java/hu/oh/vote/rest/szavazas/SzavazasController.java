@@ -1,15 +1,20 @@
 package hu.oh.vote.rest.szavazas;
 
 
-import hu.oh.vote.*;
+import hu.oh.vote.kimutatasok.KepviseloReszvetelAtlag;
+import hu.oh.vote.kimutatasok.KulonlegesEljarasokSzamaValasz;
+import hu.oh.vote.napi_szavazasok.NapiSzavazasokValasz;
 import hu.oh.vote.service.szavazas.SzavazasService;
+import hu.oh.vote.szavazas.Szavazas;
+import hu.oh.vote.szavazas.SzavazasValasz;
+import hu.oh.vote.szavazas_eredmeny.SzavazasEredmenyValasz;
+import hu.oh.vote.szavazat.SzavazatValasz;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @RestController
 @RequestMapping("/szavazasok")
@@ -63,6 +68,16 @@ public class SzavazasController {
 
         return ResponseEntity.ok(
                 szavazasService.getKepviseloReszvetelAtlag(tol, ig)
+        );
+    }
+
+    @GetMapping("/kulonleges-eljarasok-szama")
+    public ResponseEntity<KulonlegesEljarasokSzamaValasz> getKulonlegesEljarasokSzama(
+            @RequestParam("idoszak-kezdete") LocalDate tol,
+            @RequestParam("idoszak-vege") LocalDate ig) {
+
+        return ResponseEntity.ok(
+                szavazasService.getKulonlegesEljarasokSzama(tol, ig)
         );
     }
 
