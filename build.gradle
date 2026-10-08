@@ -15,6 +15,10 @@ java {
 	}
 }
 
+tasks.named('bootJar') {
+	archiveFileName = 'vote.jar'
+}
+
 repositories {
 	mavenCentral()
 }
@@ -57,4 +61,15 @@ jsonSchema2Pojo {
 
 tasks.named('test') {
 	useJUnitPlatform()
+}
+
+tasks.register('dockerBuild', Exec) {
+	group = 'docker'
+	description = 'Docker image építése az alkalmazásból'
+
+	dependsOn bootJar
+
+	commandLine 'docker', 'build',
+			'-t', 'oh-vote:latest',
+			'.'
 }
